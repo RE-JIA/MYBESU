@@ -37,6 +37,7 @@ public class TestPrecompiledContract extends AbstractPrecompiledContract {
     public PrecompileContractResult computePrecompile(
             final Bytes input, @Nonnull final MessageFrame messageFrame) {
         Bytes res = Bytes.of(123);
+        System.out.println("hello rj----------------");
         return PrecompileContractResult.success(res);
     }
 }
