@@ -25,6 +25,7 @@ public class TestPrecompiledContract extends AbstractPrecompiledContract {
 
     public TestPrecompiledContract(final GasCalculator gasCalculator) {
         super("RJTEST", gasCalculator);
+        System.out.println("hello rj++++++++++++++");
     }
 
     @Override
