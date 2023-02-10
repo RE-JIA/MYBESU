@@ -38,7 +38,7 @@ public class TestPrecompiledContract extends AbstractPrecompiledContract {
     @Override
     public PrecompileContractResult computePrecompile(
             final Bytes input, @Nonnull final MessageFrame messageFrame) {
-        Bytes32 res = Bytes32.fromHexString("0x123");
+        Bytes32 res = Bytes32.fromHexString("0x0123");
         System.out.println("hello rj----------------");
         System.out.println(input.toHexString());
         return PrecompileContractResult.success(res);
