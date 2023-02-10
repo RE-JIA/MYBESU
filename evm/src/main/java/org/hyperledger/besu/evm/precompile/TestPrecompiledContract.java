@@ -14,6 +14,7 @@
  */
 package org.hyperledger.besu.evm.precompile;
 
+import org.apache.tuweni.bytes.Bytes32;
 import org.hyperledger.besu.evm.frame.MessageFrame;
 import org.hyperledger.besu.evm.gascalculator.GasCalculator;
 
@@ -25,7 +26,7 @@ public class TestPrecompiledContract extends AbstractPrecompiledContract {
 
     public TestPrecompiledContract(final GasCalculator gasCalculator) {
         super("RJTEST", gasCalculator);
-        System.out.println("hello rj++++++++++++++");
+        System.out.println("my pre contract start");
     }
 
     @Override
@@ -37,8 +38,9 @@ public class TestPrecompiledContract extends AbstractPrecompiledContract {
     @Override
     public PrecompileContractResult computePrecompile(
             final Bytes input, @Nonnull final MessageFrame messageFrame) {
-        Bytes res = Bytes.of(123);
+        Bytes32 res = Bytes32.fromHexString("0x123");
         System.out.println("hello rj----------------");
+        System.out.println(input.toHexString());
         return PrecompileContractResult.success(res);
     }
 }
