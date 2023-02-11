@@ -21,6 +21,10 @@ import org.hyperledger.besu.evm.gascalculator.GasCalculator;
 import javax.annotation.Nonnull;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.hyperledger.besu.evm.precompile.ipfsUtils.IPFSUtil;
+
+import java.io.FileInputStream;
+import java.util.Properties;
 
 public class TestPrecompiledContract extends AbstractPrecompiledContract {
 
@@ -38,8 +42,22 @@ public class TestPrecompiledContract extends AbstractPrecompiledContract {
     @Override
     public PrecompileContractResult computePrecompile(
             final Bytes input, @Nonnull final MessageFrame messageFrame) {
-        Bytes32 res = Bytes32.fromHexString("0x0123");
+
+//        try {
+//            Properties prop = new Properties();
+//            prop.load(new FileInputStream("config.properties"));
+//        }catch (Exception e){
+//            System.out.println();
+//            e.printStackTrace();
+//        }
+
+        byte[] bytes = input.toArray();
+        String cid = new String(bytes);
         System.out.println("hello rj----------------");
+        System.out.println(cid);
+//        IPFSUtil ipfsUtil = new IPFSUtil();
+        Bytes32 res = Bytes32.fromHexString("0x0123");
+
         System.out.println(input.toHexString());
         return PrecompileContractResult.success(res);
     }
