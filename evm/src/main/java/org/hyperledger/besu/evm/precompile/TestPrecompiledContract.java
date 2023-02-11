@@ -52,9 +52,13 @@ public class TestPrecompiledContract extends AbstractPrecompiledContract {
 //        }
 
         byte[] bytes = input.toArray();
-        String cid = new String(bytes);
-        System.out.println("hello rj----------------");
-        System.out.println(cid);
+        try {
+            String cid = new String(bytes, "UTF-8");
+            System.out.println("hello rj----------------");
+            System.out.println(cid);
+        }catch (Exception e){
+            System.out.println(e);
+        }
 //        IPFSUtil ipfsUtil = new IPFSUtil();
         Bytes32 res = Bytes32.fromHexString("0x0123");
 
