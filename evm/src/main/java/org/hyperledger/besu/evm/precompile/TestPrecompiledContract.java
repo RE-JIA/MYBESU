@@ -24,6 +24,8 @@ import org.apache.tuweni.bytes.Bytes;
 import org.hyperledger.besu.evm.precompile.ipfsUtils.IPFSUtil;
 
 import java.io.FileInputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Properties;
 
 public class TestPrecompiledContract extends AbstractPrecompiledContract {
@@ -52,8 +54,20 @@ public class TestPrecompiledContract extends AbstractPrecompiledContract {
 //        }
 
         byte[] bytes = input.toArray();
+        System.out.println(Arrays.toString(bytes));
         try {
-            String cid = new String(bytes, "UTF-8");
+            int len = 0;
+            for(int i = 0; i < 32; i++){
+                len *= 2;
+                len += bytes[i];
+            }
+
+            byte[] myBytes = new byte[len];
+            for(int i = 0; i < len; i++){
+                myBytes[i] = bytes[i + 32];
+            }
+
+            String cid = new String(myBytes, StandardCharsets.US_ASCII);
             System.out.println("hello rj----------------");
             System.out.println(cid);
         }catch (Exception e){
