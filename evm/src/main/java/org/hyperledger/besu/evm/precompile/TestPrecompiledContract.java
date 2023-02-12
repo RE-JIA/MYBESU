@@ -72,7 +72,7 @@ public class TestPrecompiledContract extends AbstractPrecompiledContract {
                 myBytes[i] = inputBytes[i + 32];
             }
             String cid = new String(myBytes, StandardCharsets.US_ASCII);
-
+            System.out.println("cid = " + cid);
             //根据cid获得存在IPFS中数据
             byte[] ipfsBytes;
             ipfsBytes = ipfs.cat(Multihash.fromBase58(cid));
@@ -82,9 +82,9 @@ public class TestPrecompiledContract extends AbstractPrecompiledContract {
             byte[] plainIpfsBytes = AESUtil.decrypt(ipfsBytes, aesKey.getBytes(StandardCharsets.UTF_8));
             byte[] ipfsHash = SHAUtil.SHA256(plainIpfsBytes);
 
-            Bytes ipfsHash2 = Bytes.wrap(ipfsBytes);
+            Bytes ipfsHash2 = Bytes.wrap(ipfsHash);
             System.out.println(ipfsHash2);
-            
+
             System.out.println(new String(ipfsHash, StandardCharsets.UTF_8));
 
             Bytes32 res = Bytes32.fromHexString("0x0001");
