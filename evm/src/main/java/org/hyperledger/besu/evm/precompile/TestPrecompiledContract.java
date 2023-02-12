@@ -14,6 +14,9 @@
  */
 package org.hyperledger.besu.evm.precompile;
 
+import io.ipfs.api.IPFS;
+import io.ipfs.multiaddr.MultiAddress;
+import io.ipfs.multihash.Multihash;
 import org.apache.tuweni.bytes.Bytes32;
 import org.hyperledger.besu.evm.frame.MessageFrame;
 import org.hyperledger.besu.evm.gascalculator.GasCalculator;
@@ -21,11 +24,11 @@ import org.hyperledger.besu.evm.gascalculator.GasCalculator;
 import javax.annotation.Nonnull;
 
 import org.apache.tuweni.bytes.Bytes;
-import org.hyperledger.besu.evm.precompile.ipfsUtils.IPFSUtil;
+import org.hyperledger.besu.evm.precompile.myUtils.AESUtil;
+import org.hyperledger.besu.evm.precompile.myUtils.SHAUtil;
 
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Properties;
 
 public class TestPrecompiledContract extends AbstractPrecompiledContract {
@@ -45,38 +48,49 @@ public class TestPrecompiledContract extends AbstractPrecompiledContract {
     public PrecompileContractResult computePrecompile(
             final Bytes input, @Nonnull final MessageFrame messageFrame) {
 
-//        try {
-//            Properties prop = new Properties();
-//            prop.load(new FileInputStream("config.properties"));
-//        }catch (Exception e){
-//            System.out.println();
-//            e.printStackTrace();
-//        }
-
-        byte[] bytes = input.toArray();
-        System.out.println(Arrays.toString(bytes));
         try {
+            Properties prop = new Properties();
+            prop.load(new FileInputStream("config.properties"));
+
+            //1 构建一个新的 ipfs对象
+            String ipfsAddress = (String) prop.get("ipfsAddress");
+            MultiAddress multiAddress = new MultiAddress(ipfsAddress);
+            IPFS ipfs = new IPFS(multiAddress);
+
+
+            //2 将输入的input转为String地址
+            byte[] inputBytes = input.toArray();
+            //前32字节表示输入的长度
             int len = 0;
             for(int i = 0; i < 32; i++){
                 len *= 2;
-                len += bytes[i];
+                len += inputBytes[i];
             }
-
+            //实际输入的字节
             byte[] myBytes = new byte[len];
             for(int i = 0; i < len; i++){
-                myBytes[i] = bytes[i + 32];
+                myBytes[i] = inputBytes[i + 32];
             }
-
             String cid = new String(myBytes, StandardCharsets.US_ASCII);
-            System.out.println("hello rj----------------");
-            System.out.println(cid);
-        }catch (Exception e){
-            System.out.println(e);
-        }
-//        IPFSUtil ipfsUtil = new IPFSUtil();
-        Bytes32 res = Bytes32.fromHexString("0x0123");
 
-        System.out.println(input.toHexString());
-        return PrecompileContractResult.success(res);
+            //根据cid获得存在IPFS中数据
+            byte[] ipfsBytes;
+            ipfsBytes = ipfs.cat(Multihash.fromBase58(cid));
+
+            //3 将获得到的IPFS数据解密并计算hash
+            String aesKey = (String) prop.get("aesKey");
+            byte[] plainIpfsBytes = AESUtil.decrypt(ipfsBytes, aesKey.getBytes(StandardCharsets.UTF_8));
+            byte[] ipfsHash = SHAUtil.SHA256(plainIpfsBytes);
+
+            Bytes ipfsHash2 = Bytes.wrap(ipfsBytes);
+            System.out.println(ipfsHash2);
+            System.out.println(new String(ipfsHash, StandardCharsets.UTF_8));
+
+            Bytes32 res = Bytes32.fromHexString("0x0001");
+            return PrecompileContractResult.success(res);
+        }catch (Exception e){
+            Bytes32 res = Bytes32.fromHexString("0x0000");
+            return PrecompileContractResult.success(res);
+        }
     }
 }
