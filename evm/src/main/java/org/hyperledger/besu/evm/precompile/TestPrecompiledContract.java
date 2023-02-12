@@ -84,6 +84,7 @@ public class TestPrecompiledContract extends AbstractPrecompiledContract {
 
             Bytes ipfsHash2 = Bytes.wrap(ipfsBytes);
             System.out.println(ipfsHash2);
+            
             System.out.println(new String(ipfsHash, StandardCharsets.UTF_8));
 
             Bytes32 res = Bytes32.fromHexString("0x0001");
