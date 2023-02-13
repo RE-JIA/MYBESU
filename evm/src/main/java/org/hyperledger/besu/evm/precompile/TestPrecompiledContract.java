@@ -76,19 +76,19 @@ public class TestPrecompiledContract extends AbstractPrecompiledContract {
             for(int i = len - 32; i < len; i++){
                 correctHash[i - len + 32] = inputBytes[i];
             }
+            String correctHashStr = Utils.bytes2String(correctHash);
+            System.out.println("correctHash = " + correctHashStr);
+
             for(int i = len - 64; i < len - 32; i++){
                 key[i - len + 64] = inputBytes[i];
-            }
-            byte[] ipfsAddressBytes = new byte[len - 64];
-            for(int i = 0; i < len; i++){
-                ipfsAddressBytes[i] = inputBytes[i + 32];
             }
             String keyStr = Utils.bytes2String(key);
             System.out.println("key = " + keyStr);
 
-            String correctHashStr = Utils.bytes2String(correctHash);
-            System.out.println("correctHash = " + correctHashStr);
-
+            byte[] ipfsAddressBytes = new byte[len - 64];
+            for(int i = 0; i < len; i++){
+                ipfsAddressBytes[i] = inputBytes[i + 32];
+            }
             String cid = new String(ipfsAddressBytes, StandardCharsets.US_ASCII);
             System.out.println("cid = " + cid);
             //根据cid获得存在IPFS中数据
@@ -115,6 +115,7 @@ public class TestPrecompiledContract extends AbstractPrecompiledContract {
             }
             return PrecompileContractResult.success(res);
         }catch (Exception e){
+            System.out.println(e);
             Bytes32 res = Bytes32.fromHexString("0x0000");
             return PrecompileContractResult.success(res);
         }
