@@ -26,9 +26,11 @@ import javax.annotation.Nonnull;
 import org.apache.tuweni.bytes.Bytes;
 import org.hyperledger.besu.evm.precompile.myUtils.AESUtil;
 import org.hyperledger.besu.evm.precompile.myUtils.SHAUtil;
+import org.hyperledger.besu.evm.precompile.myUtils.Utils;
 
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Properties;
 
 public class TestPrecompiledContract extends AbstractPrecompiledContract {
@@ -61,33 +63,56 @@ public class TestPrecompiledContract extends AbstractPrecompiledContract {
             //2 将输入的input转为String地址
             byte[] inputBytes = input.toArray();
             //前32字节表示输入的长度
+            // ipfsAddress + (32 byte) key + (32 byte) hash
             int len = 0;
             for(int i = 0; i < 32; i++){
                 len *= 2;
                 len += inputBytes[i];
             }
+            System.out.println("Input length = " + len);
             //实际输入的字节
-            byte[] myBytes = new byte[len];
-            for(int i = 0; i < len; i++){
-                myBytes[i] = inputBytes[i + 32];
+            byte[] key = new byte[32];
+            byte[] correctHash = new byte[32];
+            for(int i = len - 32; i < len; i++){
+                correctHash[i - len + 32] = inputBytes[i];
             }
-            String cid = new String(myBytes, StandardCharsets.US_ASCII);
+            for(int i = len - 64; i < len - 32; i++){
+                key[i - len + 64] = inputBytes[i];
+            }
+            byte[] ipfsAddressBytes = new byte[len - 64];
+            for(int i = 0; i < len; i++){
+                ipfsAddressBytes[i] = inputBytes[i + 32];
+            }
+            String keyStr = Utils.bytes2String(key);
+            System.out.println("key = " + keyStr);
+
+            String correctHashStr = Utils.bytes2String(correctHash);
+            System.out.println("correctHash = " + correctHashStr);
+
+            String cid = new String(ipfsAddressBytes, StandardCharsets.US_ASCII);
             System.out.println("cid = " + cid);
             //根据cid获得存在IPFS中数据
             byte[] ipfsBytes;
             ipfsBytes = ipfs.cat(Multihash.fromBase58(cid));
 
             //3 将获得到的IPFS数据解密并计算hash
-            String aesKey = (String) prop.get("aesKey");
-            byte[] plainIpfsBytes = AESUtil.decrypt(ipfsBytes, aesKey.getBytes(StandardCharsets.UTF_8));
-            byte[] ipfsHash = SHAUtil.SHA256(plainIpfsBytes);
+//            String aesKey = (String) prop.get("aesKey");
+            byte[] plainIpfsBytes = AESUtil.decrypt(ipfsBytes, key);
+            byte[] computeHash = SHAUtil.SHA256(plainIpfsBytes);
 
-            Bytes ipfsHash2 = Bytes.wrap(ipfsHash);
-            System.out.println(ipfsHash2);
+            String computeHashStr = Utils.bytes2String(computeHash);
+            System.out.println("correctHash = " + computeHashStr);
 
-            System.out.println(new String(ipfsHash, StandardCharsets.UTF_8));
-
-            Bytes32 res = Bytes32.fromHexString("0x0001");
+            Bytes ipfsHash = Bytes.wrap(computeHash);
+            System.out.println(ipfsHash);
+            Bytes32 res;
+            if(Arrays.equals(computeHash, correctHash)){
+                System.out.println("The File is correct!!");
+                res = Bytes32.fromHexString("0x0001");
+            }else{
+                System.out.println("The File is not correct!!");
+                res = Bytes32.fromHexString("0x0002");
+            }
             return PrecompileContractResult.success(res);
         }catch (Exception e){
             Bytes32 res = Bytes32.fromHexString("0x0000");
