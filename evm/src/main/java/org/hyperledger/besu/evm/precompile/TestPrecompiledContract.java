@@ -22,6 +22,7 @@ import org.hyperledger.besu.evm.frame.MessageFrame;
 import org.hyperledger.besu.evm.gascalculator.GasCalculator;
 
 import javax.annotation.Nonnull;
+import javax.crypto.BadPaddingException;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.hyperledger.besu.evm.precompile.myUtils.AESUtil;
@@ -91,7 +92,7 @@ public class TestPrecompiledContract extends AbstractPrecompiledContract {
             }
             String correctHashStr = Utils.bytes2String(correctHash);
             System.out.println("correctHash = " + correctHashStr);
-            
+
             //根据cid获得存在IPFS中数据
             byte[] ipfsBytes;
             ipfsBytes = ipfs.cat(Multihash.fromBase58(cid));
@@ -115,7 +116,11 @@ public class TestPrecompiledContract extends AbstractPrecompiledContract {
                 res = Bytes32.fromHexString("0x0002");
             }
             return PrecompileContractResult.success(res);
-        }catch (Exception e){
+        }catch (BadPaddingException e){
+            System.out.println("The key is bad");
+            Bytes32 res = Bytes32.fromHexString("0x0002");
+            return PrecompileContractResult.success(res);
+        } catch (Exception e){
             System.out.println(e);
             Bytes32 res = Bytes32.fromHexString("0x0000");
             return PrecompileContractResult.success(res);
