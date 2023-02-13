@@ -71,26 +71,27 @@ public class TestPrecompiledContract extends AbstractPrecompiledContract {
             }
             System.out.println("Input length = " + len);
             //实际输入的字节
-            byte[] key = new byte[32];
-            byte[] correctHash = new byte[32];
-            for(int i = len - 32; i < len; i++){
-                correctHash[i - len + 32] = inputBytes[i];
-            }
-            String correctHashStr = Utils.bytes2String(correctHash);
-            System.out.println("correctHash = " + correctHashStr);
-
-            for(int i = len - 64; i < len - 32; i++){
-                key[i - len + 64] = inputBytes[i];
-            }
-            String keyStr = Utils.bytes2String(key);
-            System.out.println("key = " + keyStr);
-
             byte[] ipfsAddressBytes = new byte[len - 64];
-            for(int i = 0; i < len; i++){
+            for(int i = 0; i < len - 64; i++){
                 ipfsAddressBytes[i] = inputBytes[i + 32];
             }
             String cid = new String(ipfsAddressBytes, StandardCharsets.US_ASCII);
             System.out.println("cid = " + cid);
+
+            byte[] key = new byte[32];
+            for(int i = 0; i < 32; i++){
+                key[i] = inputBytes[i + len - 32];
+            }
+            String keyStr = Utils.bytes2String(key);
+            System.out.println("key = " + keyStr);
+
+            byte[] correctHash = new byte[32];
+            for(int i = 0; i < 32; i++){
+                correctHash[i] = inputBytes[i + len];
+            }
+            String correctHashStr = Utils.bytes2String(correctHash);
+            System.out.println("correctHash = " + correctHashStr);
+            
             //根据cid获得存在IPFS中数据
             byte[] ipfsBytes;
             ipfsBytes = ipfs.cat(Multihash.fromBase58(cid));
